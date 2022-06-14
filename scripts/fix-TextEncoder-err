@@ -1,0 +1,10 @@
+#!/bin/sh
+
+SCRIPT_DIR="$(dirname "$(realpath "$0")")"
+DOCS_TMP_DIR="$SCRIPT_DIR/../.tmp"
+DOCS_NODE_MODULES_DIR="$SCRIPT_DIR/../node_modules"
+
+ENCODING_DIR="$DOCS_TMP_DIR/"
+ENCODING_TARGET_DIR="$DOCS_NODE_MODULES_DIR/whatwg-url/lib/"
+
+cp -rf "$ENCODING_DIR"/* "$ENCODING_TARGET_DIR"
