@@ -1,22 +1,22 @@
 const express = require("express");
 const app = express();
- const upload = require("express-fileupload");
- const morgan = require("morgan");
+const upload = require("express-fileupload");
+const morgan = require("morgan");
 const bodyParser = require("body-parser");
 require("./config/database");
- AnalyseGenetique = require("./models/BaseNucleotide");
- patient = require("./routes/PatientControllers");
- Markiting = require("./routes/markitingRouter");
- stat = require("./routes/AnalysteControllers");
+AnalyseGenetique = require("./models/BaseNucleotide");
+patient = require("./routes/PatientControllers");
+Markiting = require("./routes/markitingRouter");
+stat = require("./routes/AnalysteControllers");
 const analyseRoutes = require("./routes/analyse");
 const authAmin = require("./routes/User");
 const pingRoutes = require("./routes/ping");
 
- flash = require("express-flash");
- 
- require('dotenv').config({ path: 'config.env' }); //=> Problem .............. 
+flash = require("express-flash");
 
- const PORT = process.env.PORT || 5000; //port devient 3010
+require("dotenv").config({ path: "config.env" }); //=> Problem ..............
+
+const PORT = process.env.PORT || 6000; //port devient 3010
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const cors = require("cors");
@@ -60,7 +60,6 @@ app.post("/api/upload", uploadImage.single("image"), (req, res) => {
   res.status(200).json({ message: "Image Uploaded With Success" });
   res.send(req.file.location);
 });
-
 
 app.use(cors());
 app.use(bodyParser.json());
