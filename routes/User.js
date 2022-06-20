@@ -8,7 +8,6 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 router.post("/api/login", async (req, res, next) => {
   const { email, password } = req.body;
-
   if (!(email && password)) {
     res.status(400).send("All input is required");
   }
@@ -27,7 +26,6 @@ router.post("/api/login", async (req, res, next) => {
               expiresIn: "24h",
             }
           );
-
           return res.status(200).json({
             message: "Welcome " + user.name,
             token,
@@ -54,7 +52,6 @@ router.post("/api/login", async (req, res, next) => {
     next(err);
   }
 });
-
 router.post("/api/hash", async (req, res, next) => {
   const { password } = req.body;
   const salt = bcrypt.genSaltSync(10);

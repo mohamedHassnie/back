@@ -16,7 +16,8 @@ flash = require("express-flash");
 
 require("dotenv").config({ path: "config.env" }); //=> Problem ..............
 
-const PORT = process.env.PORT || 6000; //port devient 3010
+const PORT = process.env.PORT || 3010; //port devient 3010
+console.log(PORT);
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const cors = require("cors");
@@ -60,8 +61,15 @@ app.post("/api/upload", uploadImage.single("image"), (req, res) => {
   res.status(200).json({ message: "Image Uploaded With Success" });
   res.send(req.file.location);
 });
-
-app.use(cors());
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+app.use(
+  cors({
+    origin: CORS_ORIGIN,
+    methods: "POST,GET,PUT,DELETE,OPTIONS",
+    allowedHeaders: "Origin,X-Requested-With,Content-Type,Accept,Authorization",
+  })
+);
+console.log(CORS_ORIGIN);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(upload({ limit: "5mb" }));
