@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 //const MONGO_URL = 'mongodb://mongo_app/medicale
 //mongodb://localhost:27017/PlateformeMedicale
-const MONGO_URL = "mongodb://mongo_app/medicale";
+const MONGO_URL = "mongodb://localhost:27017/PlateformeMedicale";
 class Database {
   constructor() {
     this._connect();

@@ -16,7 +16,7 @@ flash = require("express-flash");
 
 require("dotenv").config({ path: "config.env" }); //=> Problem ..............
 
-const PORT = process.env.PORT || 3010;
+const PORT = 3010;
 console.log(PORT);
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
