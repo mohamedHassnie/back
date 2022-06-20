@@ -10,15 +10,12 @@ const {
 router.post("/api/signUpPatient", async (req, res) => {
   try {
     const {
+      UserName,
+      LastName,
       email,
-      Name,
-      ID_Passport,
-      Nationality,
-      Gender,
-      Date_of_birth,
       Contact_number,
-      Physical_Address,
-      type_analyse,
+      Nationality,
+      Date_of_birth,
     } = req.body;
 
     const patient = await Patient.findOne({ email });
@@ -31,13 +28,9 @@ router.post("/api/signUpPatient", async (req, res) => {
       UserName,
       LastName,
       email,
-      Nationality,
-      Gender,
-      Date_of_birth,
       Contact_number,
-      Country_of_Origin: "",
-      Physical_Address,
-      type_Analyse,
+      Nationality,
+      Date_of_birth,
     });
     await newPatient.save();
 

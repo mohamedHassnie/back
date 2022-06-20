@@ -4,7 +4,13 @@ user = new mongoose.Schema({
   email: { type: String },
   Barcode: { type: String },
   Product_selection: { type: String },
-  Name: {
+  UserName: {
+    type: String,
+  },
+  LastName: {
+    type: String,
+  },
+  status: {
     type: String,
   },
   ID_Passport: {

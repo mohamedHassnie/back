@@ -232,7 +232,7 @@ const treatFile = async (file) => {
       rl.on("line", async (line) => {
         lineCount++;
 
-        if ((line.split("\t")[0][0] !== "#", lineCount < 10000)) {
+        if ((line.split("\t")[0][0] !== "#", lineCount < 15000)) {
           console.log("Processing line number: ", lineCount);
           let qualityScore = line.split("\t")[9];
           switch (true) {

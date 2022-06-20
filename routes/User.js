@@ -133,6 +133,14 @@ router.get("/api/getUser", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+router.get("/api/getUserByRole", async (req, res) => {
+  try {
+    const results = await User.find({ role: req.body.role });
+    res.send(results);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
 router.get(
   "/api/getUserById/:id",
   (async = (req, res) => {
