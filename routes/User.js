@@ -4,8 +4,8 @@ const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
 const bcrypt = require("bcryptjs");
 const router = express.Router();
-const SECRET_KEY = process.env.SECRET_KEY;
-
+// const SECRET_KEY = process.env.SECRET_KEY;
+const SECRET_KEY = "AZyWmZ1456@TOOP";
 router.post("/api/login", async (req, res, next) => {
   const { email, password } = req.body;
   if (!(email && password)) {
@@ -20,21 +20,22 @@ router.post("/api/login", async (req, res, next) => {
         .then(async (match) => {
           if (!match) throw new createError(403, "Password is not correct");
           const token = jwt.sign(
-            { id: user.id, email: user.email },
+            { id: user.id, email: user.email, role: user.role },
             SECRET_KEY,
             {
               expiresIn: "24h",
             }
           );
           return res.status(200).json({
-            message: "Welcome " + user.name,
+            message: "Welcome " + user.UserName,
             token,
             user: {
               UserName: user.UserName,
               LastName: user.LastName,
               email: user.email,
               role: user.role,
-              phone: user.phone,
+              phone: user.Contact_number,
+              location: user.location,
               userImage: user.userImage,
               status: user.status,
             },
@@ -63,9 +64,18 @@ router.post("/api/hash", async (req, res, next) => {
   }
 });
 
-router.post("/api/inscritUser", async (req, res) => {
-  const { UserName, LastName, email, phone, password, status, role, image } =
-    req.body;
+router.post("/api/addUser", async (req, res) => {
+  const {
+    UserName,
+    LastName,
+    Contact_number,
+    email,
+    password,
+    role,
+    location,
+    // status,
+    // userImage,
+  } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -79,12 +89,13 @@ router.post("/api/inscritUser", async (req, res) => {
     const newUser = new User({
       UserName,
       LastName,
+      Contact_number,
       email,
-      phone,
       password: hash,
-      userImage: image,
-      status,
       role,
+      location,
+      // userImage,
+      // status,
     });
     await newUser.save();
     res.status(200).json({
@@ -157,5 +168,12 @@ router.get("/api/logout", (req, res) => {
   req.logout();
   req.flash("success_msg", "You are logged out");
   res.redirect("login");
+});
+
+router.get("/api/search/:key", async (req, res) => {
+  let data = await User.find({
+    $or: [{ UserName: { $regex: req.params.key } }],
+  });
+  res.send(data);
 });
 module.exports = router;

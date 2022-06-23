@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-adminSchema = mongoose.Schema({
+UserSchema = mongoose.Schema({
   UserName: {
     type: String,
     required: true,
@@ -14,6 +14,10 @@ adminSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  Contact_number: {
+    type: Number,
+    required: false,
+  },
   password: {
     type: String,
     required: true,
@@ -23,10 +27,7 @@ adminSchema = mongoose.Schema({
     type: String,
     required: false,
   },
-  phone: {
-    type: Number,
-    required: false,
-  },
+
   status: {
     type: String,
     required: false,
@@ -35,6 +36,7 @@ adminSchema = mongoose.Schema({
     type: String,
     required: false,
   },
+  location: { type: String },
 });
 
-module.exports = Admin = mongoose.model("User", adminSchema);
+module.exports = UserSchema = mongoose.model("UserSchema", UserSchema);

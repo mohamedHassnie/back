@@ -25,7 +25,7 @@ user = new mongoose.Schema({
   Date_of_birth: {
     type: Date,
   },
-  Contact_number: { type: String },
+  Contact_number: { type: Number },
   Physical_Address: { type: String },
 
   Medical_Questions: [

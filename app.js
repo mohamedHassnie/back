@@ -82,6 +82,7 @@ app.use(
 app.use(analyseRoutes);
 app.use(pingRoutes);
 app.use(authAmin);
+app.use(patient);
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500);

@@ -15,7 +15,7 @@ services:
     image: frontend
     stdin_open: true
     ports:
-      - "3000:3000"
+      - "3010:3010"
     volumes:
       - ./:/app
       - /app/node_modules
