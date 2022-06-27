@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const router = express.Router();
 // const SECRET_KEY = process.env.SECRET_KEY;
 const SECRET_KEY = "AZyWmZ1456@TOOP";
+
 router.post("/api/login", async (req, res, next) => {
   const { email, password } = req.body;
   if (!(email && password)) {
@@ -34,7 +35,7 @@ router.post("/api/login", async (req, res, next) => {
               LastName: user.LastName,
               email: user.email,
               role: user.role,
-              phone: user.Contact_number,
+              phone: user.phone,
               location: user.location,
               userImage: user.userImage,
               status: user.status,
@@ -53,6 +54,7 @@ router.post("/api/login", async (req, res, next) => {
     next(err);
   }
 });
+
 router.post("/api/hash", async (req, res, next) => {
   const { password } = req.body;
   const salt = bcrypt.genSaltSync(10);
@@ -68,13 +70,13 @@ router.post("/api/addUser", async (req, res) => {
   const {
     UserName,
     LastName,
-    Contact_number,
+    phone,
     email,
     password,
     role,
     location,
-    // status,
-    // userImage,
+    //status,
+    //userImage,
   } = req.body;
 
   try {
@@ -89,7 +91,7 @@ router.post("/api/addUser", async (req, res) => {
     const newUser = new User({
       UserName,
       LastName,
-      Contact_number,
+      phone,
       email,
       password: hash,
       role,
@@ -108,12 +110,13 @@ router.post("/api/addUser", async (req, res) => {
     });
   }
 });
-router.put("/api/UpdateUser/:id", async (req, res) => {
-  var userId = req.params.id.toString();
+
+router.put("/api/UpdateUser/:_id", async (req, res) => {
+  var userId = req.params._id;
   const newUser = req.body;
-  if (User.findOne({ _id: userId })) {
+  if (User.findOne({ _id: userId }).select("-password")) {
     try {
-      const markiting = await User.findOneAndUpdate(userId, newUser);
+      const markiting = await User.findByIdAndUpdate(userId, newUser);
       res.send(markiting).status(200);
     } catch (err) {
       res.send("invalid user id").status(409);
@@ -122,6 +125,7 @@ router.put("/api/UpdateUser/:id", async (req, res) => {
     res.send("user not found").status(409);
   }
 });
+
 router.delete("/api/deleteUser/:_id", async (req, res) => {
   const { _id } = req.params;
   const newUser = await User.findById(_id);
@@ -133,6 +137,7 @@ router.delete("/api/deleteUser/:_id", async (req, res) => {
     res.status(404).json({ msg: "user not found" });
   }
 });
+
 router.get("/api/getUser", async (req, res) => {
   try {
     const results = await User.find();
@@ -141,9 +146,14 @@ router.get("/api/getUser", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-router.get("/api/getUserByRole", async (req, res) => {
+
+router.post("/api/getUserByRole", async (req, res) => {
   try {
-    const results = await User.find({ role: req.body.role });
+    if (req.body.role !== "ALL") {
+      const results = await User.find({ role: req.body.role });
+      res.status(200).send(results);
+    }
+    const results = await User.find();
     res.send(results);
   } catch (error) {
     res.status(400).json({ error: error.message });

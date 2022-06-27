@@ -10,7 +10,7 @@ patient = new mongoose.Schema({
   },
 
   email: { type: String },
-  Contact_number: { type: Number },
+  phone: { type: Number },
   Nationality: {
     type: String,
   },
@@ -19,6 +19,9 @@ patient = new mongoose.Schema({
     type: Date,
   },
   message: {
+    type: String,
+  },
+  location: {
     type: String,
   },
 });

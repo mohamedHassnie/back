@@ -61,7 +61,8 @@ app.post("/api/upload", uploadImage.single("image"), (req, res) => {
   res.status(200).json({ message: "Image Uploaded With Success" });
   res.send(req.file.location);
 });
-const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+const CORS_ORIGIN = process.env.CORS_ORIGIN || PORT;
+console.log(process.env.CORS_ORIGIN);
 app.use(
   cors({
     origin: CORS_ORIGIN,

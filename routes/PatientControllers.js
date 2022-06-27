@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Patient = require("../models/patient");
+var crypto = require("crypto");
 const nodemailer = require("nodemailer");
+
 const {
   signupValidator,
   signinValidator,
@@ -13,10 +15,11 @@ router.post("/api/signUpPatient", async (req, res) => {
       UserName,
       LastName,
       email,
-      Contact_number,
+      phone,
       Nationality,
       Date_of_birth,
       message,
+      location,
     } = req.body;
 
     const patient = await Patient.findOne({ email });
@@ -30,10 +33,13 @@ router.post("/api/signUpPatient", async (req, res) => {
       UserName,
       LastName,
       email,
-      Contact_number,
+      phone,
       Nationality,
       Date_of_birth,
       message,
+      location,
+      email_token: crypto.randomBytes(64).toString("hex"),
+      isVerified: false,
     });
     await newPatient.save();
 
@@ -41,37 +47,46 @@ router.post("/api/signUpPatient", async (req, res) => {
       successMessage: "Registration success.",
     });
     // var smtpConfig = {
-    //   host: "smtp.gmail.com",
+    //   service: "smtp.gmail.com",
     //   port: 465,
-    //   secure: true, // use SSL,
-    //   // you can try with TLS, but port is then 587
+    //   secure: true,
     //   auth: {
     //     patient: "benhessine7@gmail.com",
     //     pass: "clubafricain",
     //   },
     // };
 
-    // var transporter = nodemailer.createTransport(smtpConfig);
-    // // replace hardcoded options with data passed (somedata)
-    // var mailOptions = {
-    //   from: "benhessine7@gmail.com", // sender address
-    //   to: newUser.email, // list of receivers
-    //   subject: "Hello ,verify your email ✔", // Subject line
-    //   text: "this is some text", //, // plaintext body
-    //   html: `<h2>${newUser.Name} Thanks for regestring on our site</h2>`, // You can choose to send an HTML body instead
-    // };
+    var transporter = nodemailer.createTransport({
+      service: "smtp.gmail.com",
+      auth: {
+        patient: "benhessine7@gmail.com",
+        pass: "clubafricain",
+      },
+    });
+    // replace hardcoded options with data passed (somedata)
+    var mailOptions = {
+      from: ` "verify your email" <benhessine7@gmail.com>`, // sender address
+      to: newPatient.email, // list of receivers
+      subject: "Hello ,verify your email ✔", // Subject line
+      text: "this is some text", //, // plaintext body
+      html: `<h2>${newPatient.UserName} Thanks for regestring on our site !</h2>
+      <h4> Please verify your email to continue ...</h4>
+      <a href="https://${req.headers.host}/newPatient/verify-email?token=${newPatient.emailToken}
+      Verify Your Email"></a>
+      `, // You can choose to send an HTML body instead
+    };
 
-    // transporter.sendMail(mailOptions, async (err, info) => {
-    //   try {
-    //     if (err) {
-    //       throw err;
-    //     } else {
-    //       console.log("info :" + info.response);
-    //     }
-    //   } catch (e) {
-    //     console.log(e);
-    //   }
-    // });
+    transporter.sendMail(mailOptions, async (err, info) => {
+      try {
+        if (err) {
+          throw err;
+        } else {
+          console.log("  info :" + info.response);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    });
   } catch (err) {
     console.log(" error: ", err);
     res.status(500).json({
@@ -79,6 +94,22 @@ router.post("/api/signUpPatient", async (req, res) => {
     });
   }
 });
+
+router.get("api/verify-email", async (req, res) => {
+  try {
+    const user = await Patient.findOne({ emailToken: req.params.email });
+    if (user) {
+      user.emailToken = null;
+      user.isVerified = true;
+      await user.save();
+    } else {
+      res.status(400).send({ message: "Invalid link" });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 router.delete("/api/deletePatient/:_id", async (req, res) => {
   const { _id } = req.params;
   const patient = await Patient.findById(_id);
@@ -97,10 +128,10 @@ router.put(
   validatorResult,
   async (req, res) => {
     var userId = req.params.id.toString();
-    const newUser = req.body;
+    const newPatient = req.body;
     if (Patient.findOne({ _id: userId })) {
       try {
-        const patient = await Patient.findOneAndUpdate(userId, newUser);
+        const patient = await Patient.findOneAndUpdate(userId, newPatient);
         res.send(patient).status(200);
       } catch (err) {
         res.send("invalid patient id").status(409);
