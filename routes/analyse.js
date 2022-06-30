@@ -301,7 +301,7 @@ const treatFile = async (file) => {
   }
 };
 
-router.post("/analyse", async (req, res, next) => {
+router.post("/api/analyse", async (req, res, next) => {
   if (!req.files) {
     res.send("File was not found");
   }

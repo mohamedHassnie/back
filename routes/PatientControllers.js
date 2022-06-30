@@ -46,54 +46,86 @@ router.post("/api/signUpPatient", async (req, res) => {
     res.json({
       successMessage: "Registration success.",
     });
-    // var smtpConfig = {
-    //   service: "smtp.gmail.com",
-    //   port: 465,
-    //   secure: true,
-    //   auth: {
-    //     patient: "benhessine7@gmail.com",
-    //     pass: "clubafricain",
-    //   },
-    // };
-
-    var transporter = nodemailer.createTransport({
+    var smtpConfig = {
       service: "smtp.gmail.com",
+      port: 587,
+      //secure: true,
       auth: {
         patient: "benhessine7@gmail.com",
         pass: "clubafricain",
       },
-    });
+    };
+
+    var transporter = nodemailer.createTransport(smtpConfig);
+
     // replace hardcoded options with data passed (somedata)
     var mailOptions = {
-      from: ` "verify your email" <benhessine7@gmail.com>`, // sender address
+      from: `benhessine7@gmail.com`, // sender address
       to: newPatient.email, // list of receivers
       subject: "Hello ,verify your email ✔", // Subject line
       text: "this is some text", //, // plaintext body
       html: `<h2>${newPatient.UserName} Thanks for regestring on our site !</h2>
       <h4> Please verify your email to continue ...</h4>
-      <a href="https://${req.headers.host}/newPatient/verify-email?token=${newPatient.emailToken}
+      <a href="https://${req.headers.host}
+      /newPatient/verify-email?token=${newPatient.emailToken}
       Verify Your Email"></a>
       `, // You can choose to send an HTML body instead
     };
 
-    transporter.sendMail(mailOptions, async (err, info) => {
-      try {
-        if (err) {
-          throw err;
-        } else {
-          console.log("  info :" + info.response);
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    });
+    transporter
+      .sendMail(mailOptions)
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   } catch (err) {
-    console.log(" error: ", err);
+    console.log("###777 error: ", err);
     res.status(500).json({
       errorMessage: "Server error",
     });
   }
 });
+
+// router.post("/api/test-email", async function (req, res) {
+//   var smtpConfig = {
+//     service: "smtp.gmail.com",
+//     port: 465,
+//     secure: true,
+//     auth: {
+//       patient: "benhessine7@gmail.com",
+//       pass: "clubafricain",
+//     },
+//   };
+//   var mailOptions = {
+//     from: `benhessine7@gmail.com`, // sender address
+//     to: "ezzjhc@knowledgemd.com", // list of receivers
+//     subject: "Hello ,verify your email ✔", // Subject line
+//     text: "this is some text", //, // plaintext body
+//     html: `<h2>TEST</h2>
+//     `, // You can choose to send an HTML body instead
+//   };
+//   var transporter = nodemailer.createTransport(smtpConfig);
+//   // verify connection configuration
+//   transporter.verify(function (error, success) {
+//     if (error) {
+//       console.log(error);
+//     } else {
+//       console.log("Server is ready to take our messages");
+//     }
+//   });
+//   transporter
+//     .sendMail(mailOptions)
+//     .then((data) => {
+//       console.log(data);
+//       res.send("ok");
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//       res.send("notok");
+//     });
+// });
 
 router.get("api/verify-email", async (req, res) => {
   try {

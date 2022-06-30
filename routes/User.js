@@ -45,6 +45,7 @@ router.post("/api/login", async (req, res, next) => {
         .catch((error) => {
           console.error(error);
           next(error);
+          res.status().json({ message: "Connexion réfuser " + user.UserName });
         });
     } else {
       throw new createError(404, "Email not found");
@@ -75,8 +76,8 @@ router.post("/api/addUser", async (req, res) => {
     password,
     role,
     location,
-    //status,
-    //userImage,
+    status,
+    userImage,
   } = req.body;
 
   try {
@@ -96,8 +97,8 @@ router.post("/api/addUser", async (req, res) => {
       password: hash,
       role,
       location,
-      // userImage,
-      // status,
+      userImage,
+      status,
     });
     await newUser.save();
     res.status(200).json({

@@ -37,6 +37,8 @@ UserSchema = mongoose.Schema({
     required: false,
   },
   location: { type: String },
+  emailToken: { type: String },
+  isVerified: { type: Boolean },
 });
 
 module.exports = UserSchema = mongoose.model("Users", UserSchema);

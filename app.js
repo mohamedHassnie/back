@@ -16,15 +16,14 @@ flash = require("express-flash");
 
 require("dotenv").config({ path: "config.env" }); //=> Problem ..............
 
-const PORT = 3010;
+const PORT = 3011;
 console.log(PORT);
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
-// stocker information dans bd a travers un id et dans le cookies ( navigateur)
-
+//stocker information dans bd a travers un id et dans le cookies ( navigateur)
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, "images");
@@ -53,7 +52,7 @@ const uploadImage = multer({
 });
 
 // POST File
-app.post("/api/upload", uploadImage.single("image"), (req, res) => {
+app.post("/api/upload", uploadImage.single("userImage"), (req, res) => {
   console.log("Upload", req.file.location);
   if (req.file.location) {
     return res.status(200).json({ message: "Image Uploaded With Success" });
