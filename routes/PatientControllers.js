@@ -9,84 +9,96 @@ const {
   signinValidator,
   validatorResult,
 } = require("../middleware/validator");
-router.post("/api/signUpPatient", async (req, res) => {
-  try {
-    const {
-      UserName,
-      LastName,
-      email,
-      phone,
-      Nationality,
-      Date_of_birth,
-      message,
-      location,
-    } = req.body;
+router.post(
+  "/api/signUpPatient",
 
-    const patient = await Patient.findOne({ email });
-    if (patient) {
-      console.log(patient);
-      return res.status(400).json({
-        errorMessage: "Email already exists",
+  async (req, res) => {
+    try {
+      const {
+        UserName,
+        LastName,
+        email,
+        phone,
+        Nationality,
+        Date_of_birth,
+        message,
+        location,
+        Type_Analyse,
+        Gender,
+      } = req.body;
+
+      const patient = await Patient.findOne({ email });
+      if (patient) {
+        console.log(patient);
+        return res.status(400).json({
+          errorMessage: "Email already exists",
+        });
+      }
+      const newPatient = new Patient({
+        UserName,
+        LastName,
+        email,
+        phone,
+        Nationality,
+        Date_of_birth,
+        message,
+        location,
+        email_token: crypto.randomBytes(64).toString("hex"),
+        isVerified: false,
+        Type_Analyse,
+        Gender,
+      });
+      console.log(Type_Analyse);
+      await newPatient.save();
+
+      res.json({
+        successMessage:
+          ` Thank you ` +
+          newPatient.UserName +
+          `  Your compte has been saved !`,
+      });
+      // var smtpConfig = {
+      //   service: "smtp.gmail.com",
+      //   port: 587,
+      //   //secure: true,
+      //   auth: {
+      //     patient: "benhessine7@gmail.com",
+      //     pass: "clubafricain",
+      //   },
+      // };
+
+      // var transporter = nodemailer.createTransport(smtpConfig);
+
+      // // replace hardcoded options with data passed (somedata)
+      // var mailOptions = {
+      //   from: `benhessine7@gmail.com`, // sender address
+      //   to: newPatient.email, // list of receivers
+      //   subject: "Hello ,verify your email ✔", // Subject line
+      //   text: "this is some text", //, // plaintext body
+      //   html: `<h2>${newPatient.UserName} Thanks for regestring on our site !</h2>
+      // <h4> Please verify your email to continue ...</h4>
+      // <a href="https://${req.headers.host}
+      // /newPatient/verify-email?token=${newPatient.emailToken}
+      // Verify Your Email"></a>
+      // `, // You can choose to send an HTML body instead
+      // };
+
+      // transporter
+      //   .sendMail(mailOptions)
+      //   .then((data) => {
+      //     console.log(data);
+      //   })
+      // .catch((err) => {
+      //   console.log(err);
+      // });
+    } catch (err) {
+      console.log("###777 error: ", err);
+      res.status(500).json({
+        errorMessage: "Server error",
       });
     }
-    const newPatient = new Patient({
-      UserName,
-      LastName,
-      email,
-      phone,
-      Nationality,
-      Date_of_birth,
-      message,
-      location,
-      email_token: crypto.randomBytes(64).toString("hex"),
-      isVerified: false,
-    });
-    await newPatient.save();
-
-    res.json({
-      successMessage: "Registration success.",
-    });
-    var smtpConfig = {
-      service: "smtp.gmail.com",
-      port: 587,
-      //secure: true,
-      auth: {
-        patient: "benhessine7@gmail.com",
-        pass: "clubafricain",
-      },
-    };
-
-    var transporter = nodemailer.createTransport(smtpConfig);
-
-    // replace hardcoded options with data passed (somedata)
-    var mailOptions = {
-      from: `benhessine7@gmail.com`, // sender address
-      to: newPatient.email, // list of receivers
-      subject: "Hello ,verify your email ✔", // Subject line
-      text: "this is some text", //, // plaintext body
-      html: `<h2>${newPatient.UserName} Thanks for regestring on our site !</h2>
-      <h4> Please verify your email to continue ...</h4>
-      <a href="https://${req.headers.host}
-      /newPatient/verify-email?token=${newPatient.emailToken}
-      Verify Your Email"></a>
-      `, // You can choose to send an HTML body instead
-    };
-
-    transporter
-      .sendMail(mailOptions)
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  } catch (err) {
-    console.log("###777 error: ", err);
-    res.status(500).json({
-      errorMessage: "Server error",
-    });
   }
-});
+);
 
 // router.post("/api/test-email", async function (req, res) {
 //   var smtpConfig = {

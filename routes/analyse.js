@@ -232,7 +232,7 @@ const treatFile = async (file) => {
       rl.on("line", async (line) => {
         lineCount++;
 
-        if ((line.split("\t")[0][0] !== "#", lineCount < 15000)) {
+        if ((line.split("\t")[0][0] !== "#", lineCount < 300000)) {
           console.log("Processing line number: ", lineCount);
           let qualityScore = line.split("\t")[9];
           switch (true) {
@@ -378,7 +378,7 @@ router.post("/api/analyse", async (req, res, next) => {
     throw error;
   }
 });
-/*
+
 router.get("/dataUser", (req, res) => {
   try {
     const results = User.find();
@@ -387,6 +387,7 @@ router.get("/dataUser", (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+
 router.get("/dataGT", (req, res) => {
   try {
     const results = AnalyseGenetique.find();
@@ -395,5 +396,25 @@ router.get("/dataGT", (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-*/
+
+router.get("/api/getCount", async (req, res) => {
+  var FILE_USER_PATH = path.join(__dirname, "../uploadsCSV/");
+  var FILE_CHROMO_USER_PATH = path.join(__dirname, "../uploadsVCF/");
+  let UserfileCSV = 0;
+  let UserfileVCF = 0;
+  //passsing directoryPath and callback function
+  fs.readdir(FILE_USER_PATH, function (err, filesCSV) {
+    if (err) {
+      return console.log("Unable to scan directory: " + err);
+    }
+    fs.readdir(FILE_CHROMO_USER_PATH, function (err, filesvCF) {
+      if (err) {
+        return console.log("Unable to scan directory: " + err);
+      }
+      UserfileCSV = filesCSV.length;
+      UserfileVCF = filesvCF.length;
+      res.json({ UserfileCSV: UserfileCSV, UserfileVCF: UserfileVCF });
+    });
+  });
+});
 module.exports = router;

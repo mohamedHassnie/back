@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
     cb(null, "images");
   },
   filename(req, file, cb) {
-    cb(null, `${file.originalname}_${Date.now()}`);
+    cb(null, `${file.originalname}`);
   },
 });
 
@@ -60,15 +60,16 @@ app.post("/api/upload", uploadImage.single("userImage"), (req, res) => {
   res.status(200).json({ message: "Image Uploaded With Success" });
   res.send(req.file.location);
 });
-const CORS_ORIGIN = process.env.CORS_ORIGIN || PORT;
-console.log(process.env.CORS_ORIGIN);
-app.use(
-  cors({
-    origin: CORS_ORIGIN,
-    methods: "POST,GET,PUT,DELETE,OPTIONS",
-    allowedHeaders: "Origin,X-Requested-With,Content-Type,Accept,Authorization",
-  })
-);
+
+// const CORS_ORIGIN = process.env.CORS_ORIGIN || PORT;
+// console.log(process.env.CORS_ORIGIN);
+// app.use(
+//   cors({
+//     origin: "*",
+//     methods: "POST,GET,PUT,DELETE,OPTIONS",
+//     allowedHeaders: "Origin,X-Requested-With,Content-Type,Accept,Authorization",
+//   })
+// );
 console.log(CORS_ORIGIN);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

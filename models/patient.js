@@ -14,6 +14,9 @@ patient = new mongoose.Schema({
   Nationality: {
     type: String,
   },
+  Type_Analyse: {
+    type: String,
+  },
 
   Date_of_birth: {
     type: Date,
@@ -24,6 +27,7 @@ patient = new mongoose.Schema({
   location: {
     type: String,
   },
+  Gender: { type: String },
 });
 
 module.exports = patient = mongoose.model("patient", patient);

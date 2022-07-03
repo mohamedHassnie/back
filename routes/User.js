@@ -15,6 +15,7 @@ router.post("/api/login", async (req, res, next) => {
   try {
     const user = await User.findOne({ email: email });
     console.log("eeee", user);
+
     if (user) {
       bcrypt
         .compare(password, user.password)
@@ -27,10 +28,14 @@ router.post("/api/login", async (req, res, next) => {
               expiresIn: "24h",
             }
           );
+          User.findByIdAndUpdate(user._id, {
+            status: "active",
+          });
           return res.status(200).json({
             message: "Welcome " + user.UserName,
             token,
             user: {
+              id: user._id,
               UserName: user.UserName,
               LastName: user.LastName,
               email: user.email,
@@ -102,7 +107,7 @@ router.post("/api/addUser", async (req, res) => {
     });
     await newUser.save();
     res.status(200).json({
-      successMessage: "Registration success. Please signin.",
+      successMessage: `Compte ` + newUser.UserName + `Your work has been saved`,
     });
   } catch (e) {
     console.log(e);
@@ -112,6 +117,62 @@ router.post("/api/addUser", async (req, res) => {
   }
 });
 
+router.post("/api/password/:id/:token", async (req, res) => {
+  const id = req.params.id;
+  if (!req.body) {
+    res.status(400).send({ message: "Content can not be empty!" });
+    return;
+  }
+
+  const doesExist = await User.findById(id);
+  const passwordMatch = await bcrypt.compare(
+    req.body.oldpass,
+    doesExist.password
+  );
+
+  if (!passwordMatch) {
+    res.status(400).send({ message: "Password incorrect" });
+  } else {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    let pass = hashedPassword;
+
+    User.findByIdAndUpdate(id, { password: pass }, { useFindAndModify: false })
+      .then((data) => {
+        if (!data) {
+          res.status(404).send({
+            message: "Cannot update user with ${id}/Maybe user not found!",
+          });
+        } else {
+          res.send(data);
+        }
+      })
+      .catch((err) => {
+        res.status.send({ message: "Error update user information" });
+      });
+  }
+});
+router.post("api/updatepass/:id", async (req, res) => {
+  if (!req.body) {
+    res.status(400).send({ message: "Content can not be empty!" });
+    return;
+  }
+
+  const doesExist = await User.findOne({ email: req.body.email });
+  if (!doesExist) res.status(400).send({ message: "Email Not found !" });
+  else {
+    res.json({
+      _id: doesExist._id,
+      token: jwt.sign(
+        { _id: doesExist._id, email: doesExist.email },
+        "ParkingAppXXX",
+        {
+          expiresIn: "24h",
+        }
+      ),
+    });
+  }
+});
 router.put("/api/UpdateUser/:_id", async (req, res) => {
   var userId = req.params._id;
   const newUser = req.body;
@@ -175,10 +236,14 @@ router.get(
       });
   })
 );
-router.get("/api/logout", (req, res) => {
-  req.logout();
-  req.flash("success_msg", "You are logged out");
-  res.redirect("login");
+router.get("/api/logout/:id", (req, res) => {
+  //id ne5thouh min route
+  // body : req.body yetsamao query
+  //params: f path
+  //?name=mohamed & query tetb3ath f path mtee url
+  User.findByIdAndUpdate(req.params.id, {
+    status: "inactive",
+  });
 });
 
 router.get("/api/search/:key", async (req, res) => {
@@ -187,4 +252,5 @@ router.get("/api/search/:key", async (req, res) => {
   });
   res.send(data);
 });
+
 module.exports = router;
