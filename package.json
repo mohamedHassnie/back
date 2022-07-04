@@ -31,6 +31,7 @@
     "express-session": "^1.17.2",
     "express-validator": "^6.14.0",
     "fs": "0.0.1-security",
+    "google-auth-library": "^8.1.0",
     "http-errors": "^2.0.0",
     "installed-check": "^5.0.0",
     "json-array-converter": "^1.0.3",

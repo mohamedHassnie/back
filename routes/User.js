@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
 const bcrypt = require("bcryptjs");
 const router = express.Router();
+
 // const SECRET_KEY = process.env.SECRET_KEY;
 const SECRET_KEY = "AZyWmZ1456@TOOP";
 
@@ -117,7 +118,7 @@ router.post("/api/addUser", async (req, res) => {
   }
 });
 
-router.post("/api/password/:id/:token", async (req, res) => {
+router.put("/api/updatepass/:id", async (req, res) => {
   const id = req.params.id;
   if (!req.body) {
     res.status(400).send({ message: "Content can not be empty!" });
@@ -152,7 +153,8 @@ router.post("/api/password/:id/:token", async (req, res) => {
       });
   }
 });
-router.post("api/updatepass/:id", async (req, res) => {
+
+router.post("/api/request/password", async (req, res) => {
   if (!req.body) {
     res.status(400).send({ message: "Content can not be empty!" });
     return;
@@ -173,6 +175,8 @@ router.post("api/updatepass/:id", async (req, res) => {
     });
   }
 });
+
+
 router.put("/api/UpdateUser/:_id", async (req, res) => {
   var userId = req.params._id;
   const newUser = req.body;
@@ -252,5 +256,43 @@ router.get("/api/search/:key", async (req, res) => {
   });
   res.send(data);
 });
+
+router.post( "/api/loginGoogle", (req, res) => {
+  
+  if (!req.body) {
+    res.status(400).send({ message: "Content can not be empty!" });
+    return;
+  }
+
+  const user =  User.findOne({ email: req.body.email });
+  if (!user) res.status(400).send({ message: "Email Not found !" });
+  else {
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      SECRET_KEY,
+      {
+        expiresIn: "24h",
+      }
+    );
+      res.json({
+        message: "Welcome " + user.UserName,
+        token,
+        user: {
+          id: user._id,
+          UserName: user.UserName,
+          LastName: user.LastName,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          location: user.location,
+          userImage: user.userImage,
+          status: user.status,
+        },
+      });
+      
+  }
+});
+
+
 
 module.exports = router;
