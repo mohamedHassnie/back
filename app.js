@@ -4,17 +4,15 @@ const upload = require("express-fileupload");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 require("./config/database");
-AnalyseGenetique = require("./models/BaseNucleotide");
-patient = require("./routes/PatientControllers");
-Markiting = require("./routes/markitingRouter");
-stat = require("./routes/AnalysteControllers");
+const patient = require("./routes/PatientControllers");
+const vacation = require("./routes/vacation");
+
 const analyseRoutes = require("./routes/analyse");
 const authAmin = require("./routes/User");
 const pingRoutes = require("./routes/ping");
-const { OAuth2Client } = require('google-auth-library');
+const { OAuth2Client } = require("google-auth-library");
 const jwt = require("jsonwebtoken");
 const SECRET_KEY = "AZyWmZ1456@TOOP";
-
 flash = require("express-flash");
 
 require("dotenv").config({ path: "config.env" }); //=> Problem ..............
@@ -64,10 +62,11 @@ app.post("/api/upload", uploadImage.single("userImage"), (req, res) => {
   res.send(req.file.location);
 });
 
+//Login Google
 
-//Login Google 
-
-const client = new OAuth2Client("383609296631-1rqh8hldbf76j1420idr4l0bhhab1lhr.apps.googleusercontent.co");
+const client = new OAuth2Client(
+  "383609296631-1rqh8hldbf76j1420idr4l0bhhab1lhr.apps.googleusercontent.co"
+);
 
 const users = [];
 
@@ -81,25 +80,24 @@ app.post("api/google-login", (req, res) => {
 
   const ticket = client.verifyIdToken({
     idToken: token,
-    audience: "383609296631-1rqh8hldbf76j1420idr4l0bhhab1lhr.apps.googleusercontent.co",
+    audience:
+      "383609296631-1rqh8hldbf76j1420idr4l0bhhab1lhr.apps.googleusercontent.co",
   });
 
-  const { name, email, picture , sub } = ticket.getPayload();
+  const { name, email, picture, sub } = ticket.getPayload();
 
   upsert(users, { name, email, picture });
 
-  
-  let Usertoken =   jwt.sign(
-    { _id: sub , email: email },
+  let Usertoken = jwt.sign(
+    { _id: sub, email: email },
     "ParkingReactApXXX2020",
     {
       expiresIn: "24h",
     }
-  )
+  );
   res.status(201);
-  res.json({ name, email, photo:picture,token:Usertoken,_id: sub });
+  res.json({ name, email, photo: picture, token: Usertoken, _id: sub });
 });
-
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -124,8 +122,7 @@ app.use(analyseRoutes);
 app.use(pingRoutes);
 app.use(authAmin);
 app.use(patient);
-
-
+app.use(vacation);
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500);

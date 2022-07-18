@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
-user = new mongoose.Schema({
+UserCsv = new mongoose.Schema({
   Date: { type: Date, default: Date.now() },
   email: { type: String },
   Barcode: { type: String },
   Product_selection: { type: String },
-  UserName: {
+  UserCsvName: {
     type: String,
   },
   LastName: {
@@ -219,4 +219,4 @@ user = new mongoose.Schema({
   ],
 });
 
-module.exports = user = mongoose.model("user", user);
+module.exports = UserCsv = mongoose.model("UserCsv", UserCsv);

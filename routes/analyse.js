@@ -1,10 +1,14 @@
 const express = require("express");
-const User = require("../models/user");
+
 //const readline = require("linebyline");
 const readline = require("readline");
 const fs = require("fs");
+const util = require("util");
 const path = require("path");
 const router = express.Router();
+AnalyseGenetique = require("../models/BaseNucleotide");
+const userCsv = require("../models/UserCsv");
+const log = require("../models/log");
 //api const liste =
 const { success } = require("consola");
 const uploadFileToServerStorage = (file, name, storage) => {
@@ -191,11 +195,11 @@ const treatFile = async (file) => {
       },
     ];
 
-    let user = await User.findOne({ Barcode });
+    let user = await userCsv.findOne({ Barcode });
     if (user) {
       console.log("user deja existe");
     } else {
-      await User.create({
+      await userCsv.create({
         Barcode,
         Name,
         ID_Passport,
@@ -232,8 +236,8 @@ const treatFile = async (file) => {
       rl.on("line", async (line) => {
         lineCount++;
 
-        if ((line.split("\t")[0][0] !== "#", lineCount < 300000)) {
-          console.log("Processing line number: ", lineCount);
+        if (line.split("\t")[0][0] !== "#") {
+          // console.log("Processing line number: ", lineCount);
           let qualityScore = line.split("\t")[9];
           switch (true) {
             case CASE00.test(qualityScore):
@@ -264,7 +268,7 @@ const treatFile = async (file) => {
             //else if (qualityScore.match(CASE12))
             case CASE12.test(qualityScore):
               await AnalyseGenetique.create({
-                Barcode: user._id,
+                // Barcode: user._id,
                 ID: line.split("\t")[2],
                 POS: line.split("\t")[1],
                 GénoType: line.split("\t")[4] + " | " + line.split("\t")[4],
@@ -292,12 +296,16 @@ const treatFile = async (file) => {
       rl.on("close", function () {
         console.log("end ", file.name);
         resolve();
+        fs.unlinkSync(FILE_USER_PATH);
+        fs.unlinkSync(FILE_CHROMO_USER_PATH);
       });
-      fs.unlinkSync(FILE_USER_PATH);
-      fs.unlinkSync(FILE_CHROMO_USER_PATH);
+      //pathFile
     });
   } catch (error) {
-    console.log("error: ", error);
+    throw Error;
+    //console.log("error: ", error);
+    // reject(error);
+    // throw Error;
   }
 };
 
@@ -339,6 +347,11 @@ router.post("/api/analyse", async (req, res, next) => {
               path.join(__dirname, "../uploadsCSV/", fileName + ".csv")
             )
           ) {
+            newPath = log.create({
+              path: "../uploadsCSV/",
+              name: fileName,
+              description: "new file",
+            });
             treatFile(file);
             response = `En cours d'analyse ${file.name} les fichiers ont démarré avec succès`;
           } else {
@@ -357,6 +370,7 @@ router.post("/api/analyse", async (req, res, next) => {
       //   await execute(f, responses);
 
       //  recursivté
+      console.log(file.length);
       let i = file.length;
       console.log(file[0].name, "nchoufou i");
       const executeAll = async (file, i) => {
@@ -381,7 +395,7 @@ router.post("/api/analyse", async (req, res, next) => {
 
 router.get("/dataUser", (req, res) => {
   try {
-    const results = User.find();
+    const results = userCsv.find();
     res.send(results);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -398,23 +412,27 @@ router.get("/dataGT", (req, res) => {
 });
 
 router.get("/api/getCount", async (req, res) => {
-  var FILE_USER_PATH = path.join(__dirname, "../uploadsCSV/");
-  var FILE_CHROMO_USER_PATH = path.join(__dirname, "../uploadsVCF/");
-  let UserfileCSV = 0;
-  let UserfileVCF = 0;
-  //passsing directoryPath and callback function
-  fs.readdir(FILE_USER_PATH, function (err, filesCSV) {
-    if (err) {
-      return console.log("Unable to scan directory: " + err);
-    }
-    fs.readdir(FILE_CHROMO_USER_PATH, function (err, filesvCF) {
-      if (err) {
-        return console.log("Unable to scan directory: " + err);
-      }
-      UserfileCSV = filesCSV.length;
-      UserfileVCF = filesvCF.length;
-      res.json({ UserfileCSV: UserfileCSV, UserfileVCF: UserfileVCF });
-    });
-  });
+  try {
+    const readdir = util.promisify(fs.readdir);
+    const FILE_USER_PATH = path.join(__dirname, "../uploadsCSV/");
+    const FILE_CHROMO_USER_PATH = path.join(__dirname, "../uploadsVCF/");
+
+    let UserfileCSV = 0;
+    let UserfileVCF = 0;
+    const UserfileVCFRes = await readdir(FILE_CHROMO_USER_PATH);
+    if (!UserfileVCFRes)
+      throw new Error("Error while checking number of VCF files!");
+    else UserfileVCF = UserfileVCFRes.length - 1;
+    const UserfileCSVRes = await readdir(FILE_USER_PATH);
+    if (!UserfileCSVRes)
+      throw new Error("Error while checking number of CSV files!");
+    else UserfileCSV = UserfileCSVRes.length - 1;
+
+    data = { UserfileCSV, UserfileVCF };
+    res.status(200).json(data);
+  } catch (error) {
+    err = res.json({ error: error.message });
+  }
 });
+
 module.exports = router;
