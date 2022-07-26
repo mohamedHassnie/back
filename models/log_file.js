@@ -1,12 +1,15 @@
 const mongoose = require("mongoose");
 log = new mongoose.Schema({
-  Date: { type: Date, default: Date.now() },
+  Date: { type: Date, default: new Date() },
 
-  path: {
+  pathCsv: {
+    type: String,
+  },
+  pathVcf: {
     type: String,
   },
   name: { type: String },
   description: { type: String },
 });
 
-module.exports = log = mongoose.model("log", log);
+module.exports = log = mongoose.model("log_file", log);

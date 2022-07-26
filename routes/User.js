@@ -4,75 +4,12 @@ const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
 const bcrypt = require("bcryptjs");
 const router = express.Router();
-// const SECRET_KEY = process.env.SECRET_KEY;
 const SECRET_KEY = "AZyWmZ1456@TOOP";
+// const SECRET_KEY = process.env.SECRET_KEY;
+const auth = require("../middleware/auth");
+var address = require("address");
 
-router.post("/api/login", async (req, res, next) => {
-  const { email, password } = req.body;
-  if (!(email && password)) {
-    res.status(400).send("All input is required");
-  }
-  try {
-    const user = await User.findOne({ email: email });
-    console.log("eeee", user);
-
-    if (user) {
-      bcrypt
-        .compare(password, user.password)
-        .then(async (match) => {
-          if (!match) throw new createError(403, "Password is not correct");
-          const token = jwt.sign(
-            { id: user.id, email: user.email, role: user.role },
-            SECRET_KEY,
-            {
-              expiresIn: "24h",
-            }
-          );
-          User.findByIdAndUpdate(user._id, {
-            status: "active",
-          });
-          return res.status(200).json({
-            message: "Welcome " + user.UserName,
-            token,
-            user: {
-              id: user._id,
-              UserName: user.UserName,
-              LastName: user.LastName,
-              email: user.email,
-              role: user.role,
-              phone: user.phone,
-              location: user.location,
-              userImage: user.userImage,
-              status: user.status,
-            },
-          });
-        })
-        .catch((error) => {
-          console.error(error);
-          next(error);
-          res.status().json({ message: "Connexion réfuser " + user.UserName });
-        });
-    } else {
-      throw new createError(404, "Email not found");
-    }
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
-});
-
-router.post("/api/hash", async (req, res, next) => {
-  const { password } = req.body;
-  const salt = bcrypt.genSaltSync(10);
-  try {
-    const hash = bcrypt.hashSync(password, salt);
-    res.status(201).json({ hash });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.post("/api/addUser", async (req, res) => {
+router.post("/api/addUser", auth.verifyToken, async (req, res) => {
   const {
     UserName,
     LastName,
@@ -84,6 +21,7 @@ router.post("/api/addUser", async (req, res) => {
     status,
     userImage,
   } = req.body;
+  let ip = address.ip();
 
   try {
     const user = await User.findOne({ email });
@@ -104,6 +42,7 @@ router.post("/api/addUser", async (req, res) => {
       location,
       userImage,
       status,
+      ip,
     });
     await newUser.save();
     res.status(200).json({
@@ -117,7 +56,7 @@ router.post("/api/addUser", async (req, res) => {
   }
 });
 
-router.put("/api/updatepass/:id", async (req, res) => {
+router.put("/api/updatepass/:id", auth.verifyToken, async (req, res) => {
   const id = req.params.id;
   if (!req.body) {
     res.status(400).send({ message: "Content can not be empty!" });
@@ -153,7 +92,7 @@ router.put("/api/updatepass/:id", async (req, res) => {
   }
 });
 
-router.post("/api/request/password", async (req, res) => {
+router.post("/api/request/password", auth.verifyToken, async (req, res) => {
   if (!req.body) {
     res.status(400).send({ message: "Content can not be empty!" });
     return;
@@ -175,8 +114,11 @@ router.post("/api/request/password", async (req, res) => {
   }
 });
 
-router.put("/api/UpdateUser/:_id", async (req, res) => {
-  var userId = req.params._id;
+router.put("/api/UpdateUser", async (req, res) => {
+  let token = req.headers.authorization;
+  const decoded = jwt.verify(token, SECRET_KEY);
+  console.log("fff", decoded.id);
+  var userId = decoded.id;
   const newUser = req.body;
   if (User.findOne({ _id: userId }).select("-password")) {
     try {
@@ -190,7 +132,7 @@ router.put("/api/UpdateUser/:_id", async (req, res) => {
   }
 });
 
-router.delete("/api/deleteUser/:_id", async (req, res) => {
+router.delete("/api/deleteUser/:_id", auth.verifyToken, async (req, res) => {
   const { _id } = req.params;
   const newUser = await User.findById(_id);
   `Compte de  ${newUser} supprimé`;
@@ -202,7 +144,7 @@ router.delete("/api/deleteUser/:_id", async (req, res) => {
   }
 });
 
-router.get("/api/getUser", async (req, res) => {
+router.get("/api/getUser", auth.verifyToken, async (req, res) => {
   try {
     const results = await User.find();
     res.send(results);
@@ -225,6 +167,7 @@ router.post("/api/getUserByRole", async (req, res) => {
 });
 router.get(
   "/api/getUserById/:id",
+  auth.verifyToken,
   (async = (req, res) => {
     User.findById({ _id: req.params.id })
       .then((user) => {
@@ -238,7 +181,7 @@ router.get(
       });
   })
 );
-router.get("/api/logout/:id", (req, res) => {
+router.get("/api/logout/:id", auth.verifyToken, (req, res) => {
   //id ne5thouh min route
   // body : req.body yetsamao query
   //params: f path
@@ -248,14 +191,14 @@ router.get("/api/logout/:id", (req, res) => {
   });
 });
 
-router.get("/api/search/:key", async (req, res) => {
+router.get("/api/search/:key", auth.verifyToken, async (req, res) => {
   let data = await User.find({
     $or: [{ UserName: { $regex: req.params.key } }],
   });
   res.send(data);
 });
 
-router.post("/api/loginGoogle", (req, res) => {
+router.post("/api/loginGoogle", auth.verifyToken, (req, res) => {
   if (!req.body) {
     res.status(400).send({ message: "Content can not be empty!" });
     return;

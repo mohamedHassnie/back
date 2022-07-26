@@ -6,24 +6,27 @@ const bodyParser = require("body-parser");
 require("./config/database");
 const patient = require("./routes/PatientControllers");
 const vacation = require("./routes/vacation");
-
 const analyseRoutes = require("./routes/analyse");
-const authAmin = require("./routes/User");
+const crudUser = require("./routes/User");
 const pingRoutes = require("./routes/ping");
+const condidat = require("./routes/condidat");
+const entretient = require("./routes/entretient");
+const auth_User = require("./routes/auth_User");
 const { OAuth2Client } = require("google-auth-library");
 const jwt = require("jsonwebtoken");
-const SECRET_KEY = "AZyWmZ1456@TOOP";
 flash = require("express-flash");
-
+const socketIo = require("socket.io");
 require("dotenv").config({ path: "config.env" }); //=> Problem ..............
 
 const PORT = 3011;
 console.log(PORT);
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
-const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
+const server = require("http").createServer(app);
+const io = socketIo(server);
+io.on("connection", (socket) => {
+  console.log("new user connected");
+});
 //stocker information dans bd a travers un id et dans le cookies ( navigateur)
 const storage = multer.diskStorage({
   destination(req, file, cb) {
@@ -120,9 +123,12 @@ app.use(
 
 app.use(analyseRoutes);
 app.use(pingRoutes);
-app.use(authAmin);
+app.use(crudUser);
 app.use(patient);
 app.use(vacation);
+app.use(condidat);
+app.use(entretient);
+app.use(auth_User);
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500);

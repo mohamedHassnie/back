@@ -8,7 +8,7 @@ const path = require("path");
 const router = express.Router();
 AnalyseGenetique = require("../models/BaseNucleotide");
 const userCsv = require("../models/UserCsv");
-const log = require("../models/log");
+const log = require("../models/log_file");
 //api const liste =
 const { success } = require("consola");
 const uploadFileToServerStorage = (file, name, storage) => {
@@ -35,6 +35,12 @@ const treatFile = async (file) => {
       "../uploadsVCF/",
       file.name.split(".")[0] + ".vcf"
     );
+    newPath = log.create({
+      pathCsv: FILE_USER_PATH,
+      pathVcf: FILE_CHROMO_USER_PATH,
+      name: file.name,
+      description: file.md5 + Math.random(),
+    });
 
     const userdata = fs.readFileSync(FILE_USER_PATH).toLocaleString();
     const rows = userdata.split("\n"); // SPLIT ROWS
@@ -236,8 +242,8 @@ const treatFile = async (file) => {
       rl.on("line", async (line) => {
         lineCount++;
 
-        if (line.split("\t")[0][0] !== "#") {
-          // console.log("Processing line number: ", lineCount);
+        if (line.split("\t")[0][0] !== "#" && lineCount < 5000) {
+          console.log("Processing line number: ", lineCount);
           let qualityScore = line.split("\t")[9];
           switch (true) {
             case CASE00.test(qualityScore):
@@ -283,15 +289,6 @@ const treatFile = async (file) => {
           }
         }
       });
-      //  rl.on("pause", async function () {
-      //     paused = true;
-      //   });
-      //   rl.on("resume", () => {
-      //     paused = false;
-      //   });
-      //   rl.on("end", function () {
-      //     console.log("end");
-      //   });
 
       rl.on("close", function () {
         console.log("end ", file.name);
@@ -299,7 +296,6 @@ const treatFile = async (file) => {
         fs.unlinkSync(FILE_USER_PATH);
         fs.unlinkSync(FILE_CHROMO_USER_PATH);
       });
-      //pathFile
     });
   } catch (error) {
     throw Error;
@@ -347,11 +343,6 @@ router.post("/api/analyse", async (req, res, next) => {
               path.join(__dirname, "../uploadsCSV/", fileName + ".csv")
             )
           ) {
-            newPath = log.create({
-              path: "../uploadsCSV/",
-              name: fileName,
-              description: "new file",
-            });
             treatFile(file);
             response = `En cours d'analyse ${file.name} les fichiers ont démarré avec succès`;
           } else {
@@ -393,16 +384,16 @@ router.post("/api/analyse", async (req, res, next) => {
   }
 });
 
-router.get("/dataUser", (req, res) => {
+router.get("/api/count", (req, res) => {
   try {
-    const results = userCsv.find();
+    const results = userCsv.count();
     res.send(results);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-router.get("/dataGT", (req, res) => {
+router.get("/api/dataGT", (req, res) => {
   try {
     const results = AnalyseGenetique.find();
     res.send(results);
