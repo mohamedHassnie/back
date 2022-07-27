@@ -19,7 +19,6 @@ router.post("/api/addEntretient", async (req, res, next) => {
         interv,
         date_entretient,
         type,
-
         status: "attente",
       });
       await newentretient.save();

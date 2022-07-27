@@ -248,7 +248,7 @@ const treatFile = async (file) => {
           switch (true) {
             case CASE00.test(qualityScore):
               await AnalyseGenetique.create({
-                Barcode: user._id,
+                // Barcode: user._id,
                 ID: line.split("\t")[2],
                 POS: line.split("\t")[1],
                 GénoType: line.split("\t")[3] + " | " + line.split("\t")[3],
@@ -256,7 +256,7 @@ const treatFile = async (file) => {
               });
             case CASE01.test(qualityScore):
               await AnalyseGenetique.create({
-                Barcode: user._id,
+                // Barcode: user._id,
                 ID: line.split("\t")[2],
                 POS: line.split("\t")[1],
                 GénoType: line.split("\t")[3] + " | " + line.split("\t")[4],
@@ -264,7 +264,7 @@ const treatFile = async (file) => {
               });
             case CASE11.test(qualityScore):
               await AnalyseGenetique.create({
-                Barcode: user._id,
+                // Barcode: user._id,
                 ID: line.split("\t")[2],
                 POS: line.split("\t")[1],
                 GénoType: line.split("\t")[4] + " | " + line.split("\t")[4],
