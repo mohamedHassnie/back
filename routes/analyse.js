@@ -1,15 +1,14 @@
 const express = require("express");
-
 //const readline = require("linebyline");
 const readline = require("readline");
 const fs = require("fs");
 const util = require("util");
 const path = require("path");
 const router = express.Router();
-AnalyseGenetique = require("../models/BaseNucleotide");
+const AnalyseGenetique = require("../models/BaseNucleotide");
 const userCsv = require("../models/UserCsv");
 const log = require("../models/log_file");
-//api const liste =
+
 const { success } = require("consola");
 const uploadFileToServerStorage = (file, name, storage) => {
   return new Promise((resolve, reject) => {
@@ -123,8 +122,8 @@ const treatFile = async (file) => {
         Skin_cancer: {
           You: rows[33].split(";")[1],
           MOther: rows[33].split(";")[2],
-          Father: rows[33].split(";")[1],
-          Child: rows[33].split(";")[1],
+          Father: rows[33].split(";")[3],
+          Child: rows[33].split(";")[4],
         },
       },
     ];
@@ -176,34 +175,34 @@ const treatFile = async (file) => {
         },
       },
     ];
-    const Category1 = [
-      {
-        a1: rows[34].split(";")[1],
-        b1: rows[34].split(";")[2],
-        c1: rows[34].split(";")[3],
-        d1: rows[34].split(";")[4],
-      },
-    ];
-    const Category2 = [
-      {
-        a2: rows[34].split(";")[1],
-        b2: rows[34].split(";")[2],
-        c2: rows[34].split(";")[3],
-        d2: rows[34].split(";")[1],
-      },
-    ];
-    const Category3 = [
-      {
-        a3: rows[34].split(";")[1],
-        b3: rows[34].split(";")[1],
-        c3: rows[34].split(";")[1],
-        d3: rows[34].split(";")[1],
-      },
-    ];
+    // const Category1 = [
+    //   {
+    //     a1: rows[34].split(";")[1],
+    //     b1: rows[34].split(";")[2],
+    //     c1: rows[34].split(";")[3],
+    //     d1: rows[34].split(";")[4],
+    //   },
+    // ];
+    // const Category2 = [
+    //   {
+    //     a2: rows[34].split(";")[1],
+    //     b2: rows[34].split(";")[2],
+    //     c2: rows[34].split(";")[3],
+    //     d2: rows[34].split(";")[1],
+    //   },
+    // ];
+    // const Category3 = [
+    //   {
+    //     a3: rows[34].split(";")[1],
+    //     b3: rows[34].split(";")[1],
+    //     c3: rows[34].split(";")[1],
+    //     d3: rows[34].split(";")[1],
+    //   },
+    // ];
 
     let user = await userCsv.findOne({ Barcode });
     if (user) {
-      console.log("user deja existe");
+      res.send("user deja existe");
     } else {
       await userCsv.create({
         Barcode,
@@ -219,9 +218,6 @@ const treatFile = async (file) => {
         Medical_Questions,
         Family_Cancer_History,
         Reproductive_history,
-        Category1,
-        Category2,
-        Category3,
       });
     }
     return new Promise((resolve, reject) => {
@@ -242,13 +238,13 @@ const treatFile = async (file) => {
       rl.on("line", async (line) => {
         lineCount++;
 
-        if (line.split("\t")[0][0] !== "#" && lineCount < 5000) {
+        if (line.split("\t")[0][0] !== "#" && lineCount < 10000) {
           console.log("Processing line number: ", lineCount);
           let qualityScore = line.split("\t")[9];
           switch (true) {
             case CASE00.test(qualityScore):
               await AnalyseGenetique.create({
-                // Barcode: user._id,
+                Barcode: userCsv._id,
                 ID: line.split("\t")[2],
                 POS: line.split("\t")[1],
                 GénoType: line.split("\t")[3] + " | " + line.split("\t")[3],
@@ -256,7 +252,7 @@ const treatFile = async (file) => {
               });
             case CASE01.test(qualityScore):
               await AnalyseGenetique.create({
-                // Barcode: user._id,
+                Barcode: userCsv._id,
                 ID: line.split("\t")[2],
                 POS: line.split("\t")[1],
                 GénoType: line.split("\t")[3] + " | " + line.split("\t")[4],
@@ -264,7 +260,7 @@ const treatFile = async (file) => {
               });
             case CASE11.test(qualityScore):
               await AnalyseGenetique.create({
-                // Barcode: user._id,
+                Barcode: userCsv._id,
                 ID: line.split("\t")[2],
                 POS: line.split("\t")[1],
                 GénoType: line.split("\t")[4] + " | " + line.split("\t")[4],
@@ -274,7 +270,7 @@ const treatFile = async (file) => {
             //else if (qualityScore.match(CASE12))
             case CASE12.test(qualityScore):
               await AnalyseGenetique.create({
-                // Barcode: user._id,
+                Barcode: userCsv._id,
                 ID: line.split("\t")[2],
                 POS: line.split("\t")[1],
                 GénoType: line.split("\t")[4] + " | " + line.split("\t")[4],
@@ -384,18 +380,18 @@ router.post("/api/analyse", async (req, res, next) => {
   }
 });
 
-router.get("/api/count", (req, res) => {
+router.get("/api/dataUser", async (req, res) => {
   try {
-    const results = userCsv.count();
-    res.send(results);
+    const results = await userCsv.find();
+    res.send({ results });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-router.get("/api/dataGT", (req, res) => {
+router.get("/api/dataGT", async (req, res) => {
   try {
-    const results = AnalyseGenetique.find();
+    const results = await AnalyseGenetique.find();
     res.send(results);
   } catch (error) {
     res.status(400).json({ error: error.message });
