@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 entretient = new mongoose.Schema({
-  interview: { type: String, required: false },
-  interv: [
+  employer: { type: String, required: false },
+  condidat: [
     { UserName: { type: String, required: false } },
     { email: { type: String, required: false } },
   ],
