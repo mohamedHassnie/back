@@ -185,38 +185,38 @@ UserCsv = new mongoose.Schema({
       },
     },
   ],
-  Category1: [
-    {
-      a1: { type: String },
-      b1: { type: String },
-      c1: { type: String },
-      d1: { type: String },
-    },
-  ],
-  Category2: [
-    {
-      a2: { type: String },
-      b2: { type: String },
-      c2: { type: String },
-      d2: { type: String },
-    },
-  ],
-  Category3: [
-    {
-      a3: { type: String },
-      b3: { type: String },
-      c3: { type: String },
-      d3: { type: String },
-    },
-  ],
-  Category4: [
-    {
-      a4: { type: String },
-      b4: { type: String },
-      c4: { type: String },
-      d4: { type: String },
-    },
-  ],
+  // Category1: [
+  //   {
+  //     a1: { type: String },
+  //     b1: { type: String },
+  //     c1: { type: String },
+  //     d1: { type: String },
+  //   },
+  // ],
+  // Category2: [
+  //   {
+  //     a2: { type: String },
+  //     b2: { type: String },
+  //     c2: { type: String },
+  //     d2: { type: String },
+  //   },
+  // ],
+  // Category3: [
+  //   {
+  //     a3: { type: String },
+  //     b3: { type: String },
+  //     c3: { type: String },
+  //     d3: { type: String },
+  //   },
+  // ],
+  // Category4: [
+  //   {
+  //     a4: { type: String },
+  //     b4: { type: String },
+  //     c4: { type: String },
+  //     d4: { type: String },
+  //   },
+  // ],
 });
 
 module.exports = UserCsv = mongoose.model("UserCsv", UserCsv);

@@ -34,12 +34,12 @@ const treatFile = async (file) => {
       "../uploadsVCF/",
       file.name.split(".")[0] + ".vcf"
     );
-    newPath = log.create({
-      pathCsv: FILE_USER_PATH,
-      pathVcf: FILE_CHROMO_USER_PATH,
-      name: file.name,
-      description: file.md5 + Math.random(),
-    });
+    // newPath = log.create({
+    //   pathCsv: FILE_USER_PATH,
+    //   pathVcf: FILE_CHROMO_USER_PATH,
+    //   name: file.name,
+    //   description: file.md5 + Math.random(),
+    // });
 
     const userdata = fs.readFileSync(FILE_USER_PATH).toLocaleString();
     const rows = userdata.split("\n"); // SPLIT ROWS
@@ -202,7 +202,7 @@ const treatFile = async (file) => {
 
     let user = await userCsv.findOne({ Barcode });
     if (user) {
-      res.send("user deja existe");
+      console.log("user deja existe");
     } else {
       await userCsv.create({
         Barcode,
@@ -225,9 +225,9 @@ const treatFile = async (file) => {
         input: fs.createReadStream(FILE_CHROMO_USER_PATH),
         crlfDelay: Infinity,
       });
-      let normalizedCase = {
-        CASENS: [],
-      };
+      // let normalizedCase = {
+      //   CASENS: [],
+      // };
       const CASE00 = new RegExp(/0\/0:[1-14]*/gm);
       const CASE01 = new RegExp(/0\/1:[1-14]*/gm);
       const CASE11 = new RegExp(/1\/1:[1-14]*/gm);
@@ -238,48 +238,53 @@ const treatFile = async (file) => {
       rl.on("line", async (line) => {
         lineCount++;
 
-        if (line.split("\t")[0][0] !== "#" && lineCount < 10000) {
-          console.log("Processing line number: ", lineCount);
+        if (line.split("\t")[0][0] !== "#") {
+          //console.log("Processing line number: ", lineCount);
           let qualityScore = line.split("\t")[9];
           switch (true) {
             case CASE00.test(qualityScore):
               await AnalyseGenetique.create({
-                Barcode: userCsv._id,
-                ID: line.split("\t")[2],
-                POS: line.split("\t")[1],
+                UserId: user.Barcode,
+                ID_chrom: line.split("\t")[2],
+                // POS: line.split("\t")[1],
                 GénoType: line.split("\t")[3] + " | " + line.split("\t")[3],
-                type: "00",
+                categorie: "00",
               });
             case CASE01.test(qualityScore):
               await AnalyseGenetique.create({
-                Barcode: userCsv._id,
-                ID: line.split("\t")[2],
-                POS: line.split("\t")[1],
+                UserId: user.Barcode,
+                ID_chrom: line.split("\t")[2],
+                // POS: line.split("\t")[1],
                 GénoType: line.split("\t")[3] + " | " + line.split("\t")[4],
-                type: "01",
+                categorie: "01",
               });
             case CASE11.test(qualityScore):
               await AnalyseGenetique.create({
-                Barcode: userCsv._id,
-                ID: line.split("\t")[2],
-                POS: line.split("\t")[1],
+                UserId: user.Barcode,
+                ID_chrom: line.split("\t")[2],
+                // POS: line.split("\t")[1],
                 GénoType: line.split("\t")[4] + " | " + line.split("\t")[4],
-                type: "11",
+                categorie: "11",
               });
             // break;
             //else if (qualityScore.match(CASE12))
             case CASE12.test(qualityScore):
               await AnalyseGenetique.create({
-                Barcode: userCsv._id,
-                ID: line.split("\t")[2],
-                POS: line.split("\t")[1],
-                GénoType: line.split("\t")[4] + " | " + line.split("\t")[4],
-                type: "information invalid",
+                UserId: user.Barcode,
+                ID_chrom: line.split("\t")[2],
+                // POS: line.split("\t")[1],
+                GénoType: line.split("\t")[3] + " | " + line.split("\t")[4],
+                categorie: "information invalid",
               });
             // break;
             default:
-              normalizedCase.CASENS.push({
-                POS: line.split("\t")[1],
+              // normalizedCase.CASENS.push({
+              await AnalyseGenetique.create({
+                UserId: user.Barcode,
+                ID_chrom: line.split("\t")[2],
+                // POS: line.split("\t")[1],
+                GénoType: line.split("\t")[3] + " | " + line.split("\t")[4],
+                categorie: ".",
               });
               break;
           }
@@ -287,7 +292,11 @@ const treatFile = async (file) => {
       });
 
       rl.on("close", function () {
-        console.log("end ", file.name);
+        console.log(
+          "end" +
+            file.name +
+            "a eté stocker dans la base de donneé et supprimer dans le serveur"
+        );
         resolve();
         fs.unlinkSync(FILE_USER_PATH);
         fs.unlinkSync(FILE_CHROMO_USER_PATH);
@@ -296,7 +305,7 @@ const treatFile = async (file) => {
   } catch (error) {
     throw Error;
     //console.log("error: ", error);
-    // reject(error);
+    //reject(error);
     // throw Error;
   }
 };
@@ -305,7 +314,6 @@ router.post("/api/analyse", async (req, res, next) => {
   if (!req.files) {
     res.send("File was not found");
   }
-
   const { file } = req.files;
   const responses = [];
   try {

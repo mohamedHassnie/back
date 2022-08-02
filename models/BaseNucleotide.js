@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
 AnalyseGenetique = new mongoose.Schema({
-  Barcode: { type: String },
-  ID: {
+  UserId: { type: String },
+  ID_chrom: {
     type: String,
   },
   POS: {
@@ -12,9 +12,10 @@ AnalyseGenetique = new mongoose.Schema({
   GénoType: {
     type: String,
   },
-  type: {
+  categorie: {
     type: String,
   },
+
   //createdAt: { type: Date, expires: 60, default: Date.now },
 });
 module.exports = AnalyseGenetique = mongoose.model(
