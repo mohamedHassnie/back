@@ -244,7 +244,7 @@ const treatFile = async (file) => {
           switch (true) {
             case CASE00.test(qualityScore):
               await AnalyseGenetique.create({
-                UserId: user.Barcode,
+                // UserId: user.Barcode,
                 ID_chrom: line.split("\t")[2],
                 // POS: line.split("\t")[1],
                 GénoType: line.split("\t")[3] + " | " + line.split("\t")[3],
@@ -252,7 +252,7 @@ const treatFile = async (file) => {
               });
             case CASE01.test(qualityScore):
               await AnalyseGenetique.create({
-                UserId: user.Barcode,
+                // UserId: user.Barcode,
                 ID_chrom: line.split("\t")[2],
                 // POS: line.split("\t")[1],
                 GénoType: line.split("\t")[3] + " | " + line.split("\t")[4],
@@ -260,7 +260,7 @@ const treatFile = async (file) => {
               });
             case CASE11.test(qualityScore):
               await AnalyseGenetique.create({
-                UserId: user.Barcode,
+                // UserId: user.Barcode,
                 ID_chrom: line.split("\t")[2],
                 // POS: line.split("\t")[1],
                 GénoType: line.split("\t")[4] + " | " + line.split("\t")[4],
@@ -270,7 +270,7 @@ const treatFile = async (file) => {
             //else if (qualityScore.match(CASE12))
             case CASE12.test(qualityScore):
               await AnalyseGenetique.create({
-                UserId: user.Barcode,
+                // UserId: user.Barcode,
                 ID_chrom: line.split("\t")[2],
                 // POS: line.split("\t")[1],
                 GénoType: line.split("\t")[3] + " | " + line.split("\t")[4],
@@ -280,7 +280,7 @@ const treatFile = async (file) => {
             default:
               // normalizedCase.CASENS.push({
               await AnalyseGenetique.create({
-                UserId: user.Barcode,
+                // UserId: user.Barcode,
                 ID_chrom: line.split("\t")[2],
                 // POS: line.split("\t")[1],
                 GénoType: line.split("\t")[3] + " | " + line.split("\t")[4],
